@@ -39,10 +39,12 @@ worker_eval()
 	EXIT_CODE=$?
 	if [ 0 = "$EXIT_CODE" ]
 	then
-		log_trace "worker" "Executing command [$COMMAND] ok'"
+		log_trace "worker" "Executing command [$COMMAND] ok"
+		log_trace "exec" "$COMMAND;OK"
 		return 0
 	else
 		log_trace "worker" "Executing command [$COMMAND] failed (Exit code [$EXIT_CODE])'"
+		log_trace "exec" "$COMMAND;failed [$EXIT_CODE]"
 		return $EXIT_CODE
 	fi
 }
@@ -125,21 +127,25 @@ worker_task_execute()
 	if worker_eval "$TASK_GOAL"
 	then
 		log_debug "worker" "Executing task goal [$TASK_GOAL] ok"
-		log_debug "worker" "Executing task success handler [$TASK_SUCC] ..."
-		if worker_eval "$TASK_SUCC"
-		then
-			log_debug "worker" "Executing task success handler [$TASK_SUCC] ok"
-		else
-			log_debug "worker" "Executing task success handler [$TASK_SUCC] failed (Exit code [$?])"
+		if [ "$TASK_SUCC" != "false" ] ; then
+			log_debug "worker" "Executing task success handler [$TASK_SUCC] ..."
+			if worker_eval "$TASK_SUCC"
+			then
+				log_debug "worker" "Executing task success handler [$TASK_SUCC] ok"
+			else
+				log_debug "worker" "Executing task success handler [$TASK_SUCC] failed (Exit code [$?])"
+			fi
 		fi
 	else 
 		log_debug "worker" "Executing task goal [$TASK_GOAL] failed (Exit code [$?])"
-		log_debug "worker" "Executing task failure handler [$TASK_FAIL] ..."
-		if worker_eval "$TASK_FAIL"
-		then
-			log_debug "worker" "Executing task failure handler [$TASK_FAIL] ok"
-		else
-			log_debug "worker" "Executing task failure handler [$TASK_FAIL] failed (Exit code [$?])"
+		if [ "$TASK_FAIL" != "false" ] ; then
+			log_debug "worker" "Executing task failure handler [$TASK_FAIL] ..."
+			if worker_eval "$TASK_FAIL"
+			then
+				log_debug "worker" "Executing task failure handler [$TASK_FAIL] ok"
+			else
+				log_debug "worker" "Executing task failure handler [$TASK_FAIL] failed (Exit code [$?])"
+			fi
 		fi
 	fi
 

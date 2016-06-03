@@ -29,30 +29,33 @@ queuedb_pop()
 {
 	unset -v RESULT
 
-	log_debug "queuedb" "Popping row from [$QUEUEDB_DB_FILE] ..."
+	#log_debug "queuedb" "Popping row from [$QUEUEDB_DB_FILE] ..."
 	{
-		if ! flock -x -w "$QUEUEDB_DB_LOCK_TIMEOUT" 200
-		then
-			log_debug "queuedb" "Popping row from [$QUEUEDB_DB_FILE] failed (Lock with timeout [$QUEUEDB_DB_LOCK_TIMEOUT] failed with code [$?])"
-			return 1
-		fi
-		
-		local ROW_DATA
-		if ! read -a ROW_DATA 0<"$QUEUEDB_DB_FILE"
-		then
-			log_debug "queuedb" "Popping row from [$QUEUEDB_DB_FILE] failed (Read failed with code [$?])"
+		if [ -s "$QUEUEDB_DB_FILE" ] ; then
+			if ! flock -x -w "$QUEUEDB_DB_LOCK_TIMEOUT" 200
+			then
+				log_debug "queuedb" "Popping row from [$QUEUEDB_DB_FILE] failed (Lock with timeout [$QUEUEDB_DB_LOCK_TIMEOUT] failed with code [$?])"
+				return 1
+			fi
+			local ROW_DATA
+			if ! read -a ROW_DATA 0<"$QUEUEDB_DB_FILE"
+			then
+				log_debug "queuedb" "Popping row from [$QUEUEDB_DB_FILE] failed (Read failed with code [$?])"
+				return 2
+			fi
+
+			if ! sed -i "1d" "$QUEUEDB_DB_FILE"
+			then
+				log_debug "queuedb" "Popping row from [$QUEUEDB_DB_FILE] failed (Sed failed with code [$?])"
+				return 3
+			fi
+				
+			log_debug "queuedb" "Popping row from [$QUEUEDB_DB_FILE] ok"
+			RESULT=("${ROW_DATA[@]}")
+			return 0
+		else 
 			return 2
 		fi
-
-		if ! sed -i "1d" "$QUEUEDB_DB_FILE"
-		then
-			log_debug "queuedb" "Popping row from [$QUEUEDB_DB_FILE] failed (Sed failed with code [$?])"
-			return 3
-		fi
-			
-		log_debug "queuedb" "Popping row from [$QUEUEDB_DB_FILE] ok"
-		RESULT=("${ROW_DATA[@]}")
-		return 0
 	} 200<"$QUEUEDB_DB_LOCK" 
 }
 
@@ -128,6 +131,33 @@ queuedb_find()
 			
 		log_debug "queuedb" "Selecting row [$ROW_ID] from [$QUEUEDB_DB_FILE] ok"
 		RESULT=("${ROW_DATA[@]}")
+		return 0
+	} 200<"$QUEUEDB_DB_LOCK" 
+}
+
+## 
+## Selects data in DB file and sets up RESULT variable with found row data
+##
+## Return:
+##	0 - When all ok
+##	1 - When lock failed or timed out
+##  2 - When grep failed (f.e. not found)
+##	3 - When read failed
+## 
+queuedb_list()
+{
+	unset -v RESULT
+
+	log_debug "queuedb" "Listing [$QUEUEDB_DB_FILE] ..."
+	{
+		if ! flock -x -w "$QUEUEDB_DB_LOCK_TIMEOUT" 200
+		then
+			log_debug "queuedb" "Listing [$QUEUEDB_DB_FILE] failed (Lock with timeout [$QUEUEDB_DB_LOCK_TIMEOUT] failed with code [$?])"
+			return 1
+		fi
+			
+		log_debug "queuedb" "Listing [$QUEUEDB_DB_FILE] ok"
+		RESULT=$(cat "$QUEUEDB_DB_FILE")
 		return 0
 	} 200<"$QUEUEDB_DB_LOCK" 
 }

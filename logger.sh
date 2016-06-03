@@ -31,7 +31,8 @@ log_error()
 {
 	local LOG_SOURCE=$1
 	local LOG_MESSAGE=$2
-	(( $LOGGER_LOG_LEVEL & 1 )) && echo "[$(date '+%F %T.%N')][$LOG_SOURCE $$][ERROR] $LOG_MESSAGE" >> "$LOGGER_LOG_DIR/$LOG_SOURCE.log"
+	local DAY=$(date '+%Y-%m-%d')
+	(( $LOGGER_LOG_LEVEL & 1 )) && echo "[$(date '+%F %T.%N')][$LOG_SOURCE $$][ERROR] $LOG_MESSAGE" >> "$LOGGER_LOG_DIR/$LOG_SOURCE.$DAY.log"
 }
 
 ##
@@ -41,7 +42,8 @@ log_warn()
 {
 	local LOG_SOURCE=$1
 	local LOG_MESSAGE=$2
-	(( $LOGGER_LOG_LEVEL & 2 )) && echo "[$(date '+%F %T.%N')][$LOG_SOURCE $$][WARN]  $LOG_MESSAGE" >> "$LOGGER_LOG_DIR/$LOG_SOURCE.log"
+	local DAY=$(date '+%Y-%m-%d')
+	(( $LOGGER_LOG_LEVEL & 2 )) && echo "[$(date '+%F %T.%N')][$LOG_SOURCE $$][WARN]  $LOG_MESSAGE" >> "$LOGGER_LOG_DIR/$LOG_SOURCE.$DAY.log"
 }
 
 ##
@@ -51,7 +53,8 @@ log_info()
 {
 	local LOG_SOURCE=$1
 	local LOG_MESSAGE=$2
-	(( $LOGGER_LOG_LEVEL & 4 )) && echo "[$(date '+%F %T.%N')][$LOG_SOURCE $$][INFO]  $LOG_MESSAGE" >> "$LOGGER_LOG_DIR/$LOG_SOURCE.log"
+	local DAY=$(date '+%Y-%m-%d')
+	(( $LOGGER_LOG_LEVEL & 4 )) && echo "[$(date '+%F %T.%N')][$LOG_SOURCE $$][INFO]  $LOG_MESSAGE" >> "$LOGGER_LOG_DIR/$LOG_SOURCE.$DAY.log"
 }
 
 ##
@@ -61,7 +64,8 @@ log_debug()
 {
 	local LOG_SOURCE=$1
 	local LOG_MESSAGE=$2
-	(( $LOGGER_LOG_LEVEL & 8 )) && echo "[$(date '+%F %T.%N')][$LOG_SOURCE $$][DEBUG] $LOG_MESSAGE" >> "$LOGGER_LOG_DIR/$LOG_SOURCE.log"
+	local DAY=$(date '+%Y-%m-%d')
+	(( $LOGGER_LOG_LEVEL & 8 )) && echo "[$(date '+%F %T.%N')][$LOG_SOURCE $$][DEBUG] $LOG_MESSAGE" >> "$LOGGER_LOG_DIR/$LOG_SOURCE.$DAY.log"
 }
 
 ##
@@ -71,5 +75,6 @@ log_trace()
 {
 	local LOG_SOURCE=$1
 	local LOG_MESSAGE=$2
-	(( $LOGGER_LOG_LEVEL & 16 )) && echo "[$(date '+%F %T.%N')][$LOG_SOURCE $$][TRACE] $LOG_MESSAGE" >> "$LOGGER_LOG_DIR/$LOG_SOURCE.log"
+	local DAY=$(date '+%Y-%m-%d')
+	(( $LOGGER_LOG_LEVEL & 16 )) && echo "[$(date '+%F %T.%N')][$LOG_SOURCE $$][TRACE] $LOG_MESSAGE" >> "$LOGGER_LOG_DIR/$LOG_SOURCE.$DAY.log"
 }
